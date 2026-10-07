@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Task List</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task {
+            background: white;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .task h3 {
+            margin-top: 0;
+        }
+
+        .buttons {
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .edit {
+            background: #ffc107;
+        }
+
+        .delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .logout {
+            background: #333;
+            color: white;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="top">
+
+        <h1>My Tasks</h1>
+
+        <button class="logout" onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+    <div id="taskList">
+        Loading tasks...
+    </div>
+
+</div>
+
+
+<script>
+
+    const API_URL =
+        "http://127.0.0.1:8000/api/tasks/";
+
+    const token =
+        localStorage.getItem("token");
+
+
+    // Check login
+
+    if (!token) {
+
+        window.location.href = "login.html";
+
+    }
+
+
+    // Get tasks
+
+    async function getTasks() {
+
+        try {
+
+            const response = await fetch(
+                API_URL,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Authorization": `Token ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+
+            const data = await response.json();
+
+            console.log(data);
+
+
+            if (!response.ok) {
+
+                document.getElementById("taskList").innerText =
+                    "Unable to load tasks.";
+
+                return;
+
+            }
+
+
+            displayTasks(data);
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            document.getElementById("taskList").innerText =
+                "Server connection failed.";
+
+        }
+
+    }
+
+
+    // Display tasks
+
+    function displayTasks(tasks) {
+
+        const taskList =
+            document.getElementById("taskList");
+
+        taskList.innerHTML = "";
+
+
+        // If API returns paginated data
+        if (!Array.isArray(tasks)) {
+            tasks = tasks.results || [];
+        }
+
+
+        if (tasks.length === 0) {
+
+            taskList.innerHTML =
+                "<p>No tasks available.</p>";
+
+            return;
+
+        }
+
+
+        tasks.forEach(function(task) {
+
+            const taskDiv =
+                document.createElement("div");
+
+            taskDiv.className = "task";
+
+
+            taskDiv.innerHTML = `
+
+                <h3>${task.title}</h3>
+
+                <p>
+                    ${task.description || ""}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    ${task.status}
+                </p>
+
+                <p>
+                    <strong>Priority:</strong>
+                    ${task.priority}
+                </p>
+
+                <p>
+                    <strong>Due Date:</strong>
+                    ${task.due_date || "Not set"}
+                </p>
+
+                <div class="buttons">
+
+                    <button
+                        class="edit"
+                        onclick="editTask(${task.id})">
+                        Edit
+                    </button>
+
+                    <button
+                        class="delete"
+                        onclick="deleteTask(${task.id})">
+                        Delete
+                    </button>
+
+                </div>
+
+            `;
+
+
+            taskList.appendChild(taskDiv);
+
+        });
+
+    }
+
+
+    // Edit
+
+    function editTask(id) {
+
+        window.location.href =
+            `task-form.html?id=${id}`;
+
+    }
+
+
+    // Delete
+
+    async function deleteTask(id) {
+
+        if (!confirm("Delete this task?")) {
+            return;
+        }
+
+
+        const response = await fetch(
+            `${API_URL}${id}/delete/`,
+            {
+                method: "DELETE",
+
+                headers: {
+                    "Authorization": `Token ${token}`
+                }
+            }
+        );
+
+
+        if (response.ok) {
+
+            getTasks();
+
+        } else {
+
+            alert("Failed to delete task.");
+
+        }
+
+    }
+
+
+    function logout() {
+
+        localStorage.removeItem("token");
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    // Load tasks when page opens
+
+    getTasks();
+
+</script>
+
+</body>
+
+</html>

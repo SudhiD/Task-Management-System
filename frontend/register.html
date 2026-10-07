@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Task Manager - Register</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            min-height: 100vh;
+        }
+
+        .register-box {
+            width: 380px;
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 10px;
+
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+
+            margin-bottom: 15px;
+
+            border: 1px solid #ccc;
+            border-radius: 5px;
+
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+
+            padding: 12px;
+
+            border: none;
+            border-radius: 5px;
+
+            background: #007bff;
+            color: white;
+
+            font-size: 16px;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="register-box">
+
+        <h1>Task Manager</h1>
+
+        <h2>Create Account</h2>
+
+
+        <form id="registerForm">
+
+
+            <input
+                type="text"
+                id="username"
+                placeholder="Username"
+                required
+            >
+
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email"
+                required
+            >
+
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Password"
+                required
+            >
+
+
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm Password"
+                required
+            >
+
+
+            <button type="submit">
+                Register
+            </button>
+
+
+        </form>
+
+
+        <p id="message"></p>
+
+
+        <div class="login-link">
+
+            Already have an account?
+
+            <a href="login.html">
+                Login
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+
+    <script>
+
+
+        document
+            .getElementById("registerForm")
+            .addEventListener("submit", async function(event) {
+
+
+                event.preventDefault();
+
+
+                const username =
+                    document.getElementById("username").value;
+
+                const email =
+                    document.getElementById("email").value;
+
+                const password =
+                    document.getElementById("password").value;
+
+                const confirmPassword =
+                    document.getElementById("confirmPassword").value;
+
+
+                const message =
+                    document.getElementById("message");
+
+
+                // Check passwords before sending request
+
+                if (password !== confirmPassword) {
+
+                    message.innerText =
+                        "Passwords do not match.";
+
+                    message.style.color = "red";
+
+                    return;
+                }
+
+
+                try {
+
+
+                    const response = await fetch(
+                        "http://127.0.0.1:8000/api/users/",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                username: username,
+
+                                email: email,
+
+                                password: password
+
+                            })
+
+                        }
+                    );
+
+
+                    const data =
+                        await response.json();
+
+
+                    console.log(data);
+
+
+                    if (response.ok) {
+
+
+                        message.innerText =
+                            "Registration successful!";
+
+                        message.style.color =
+                            "green";
+
+
+                        // Clear form
+
+                        document
+                            .getElementById("registerForm")
+                            .reset();
+
+
+                        // Go to login page
+
+                        setTimeout(function() {
+
+                            window.location.href =
+                                "login.html";
+
+                        }, 1500);
+
+
+                    } else {
+
+
+                        message.innerText =
+                            JSON.stringify(data);
+
+                        message.style.color =
+                            "red";
+
+                    }
+
+
+                } catch (error) {
+
+
+                    console.error(error);
+
+
+                    message.innerText =
+                        "Unable to connect to server.";
+
+                    message.style.color =
+                        "red";
+
+                }
+
+
+            });
+
+
+    </script>
+
+
+</body>
+
+</html>
