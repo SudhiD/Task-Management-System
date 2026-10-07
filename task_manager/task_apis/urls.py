@@ -1,5 +1,5 @@
 from django.urls import path
-from task_apis.views import TaskListView, TaskDetailView, TaskEditView, TaskDeleteView, AddTaskView
+from task_apis.views import TaskListView, TaskDetailView, TaskEditView, TaskDeleteView, AddTaskView, TaskSearchView
 
 urlpatterns = [
     path('tasks/', TaskListView.as_view(), name='task-list'),
@@ -7,4 +7,5 @@ urlpatterns = [
     path('task/<int:pk>/edit/', TaskEditView.as_view(), name='task-edit'),
     path('task/<int:pk>/delete/', TaskDeleteView.as_view(), name='task-delete'),
     path('task/add/', AddTaskView.as_view(), name='add-task'),
+    path('task/search/', TaskSearchView.as_view(), name='task-search'),
 ]
